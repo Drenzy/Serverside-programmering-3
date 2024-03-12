@@ -1,67 +1,81 @@
 ﻿@page "/"
 
 @using Microsoft.AspNetCore.Authorization
+@using SoftwareTest.Models
 @attribute [Authorize(Policy = "AuthenticatedUser")]
 
-
-@inject AuthenticationStateProvider _AuthenticationStateProvider; 
+@inject AuthenticationStateProvider _AuthenticationStateProvider;
 @inject Models.TodolistContext _todoContext;
-@inject Codes.HashinHandlers _hasinHandlers;
+@inject Codes.HashinHandlers _hashinHandlers;
+@inject CprService _cprService;
 
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-        <div> You are loggined in</div>
+        <div>You are logged in @userName</div>
+        @if (!string.IsNullOrEmpty(existingCpr))
+        {
+            <div>Existing CPR: @existingCpr</div>
+        }
         <button @onclick="CreateFile">Create File</button>
+        <label for="cprInput">Enter CPR Number:</label>
+        <input id="cprInput" @bind="cprNumber" />
+        <button @onclick="AddCpr">Add CPR</button>
     </Authorized>
     <NotAuthorized>
-        <div> You are not loggined in</div>
+        <div>You are not logged in</div>
     </NotAuthorized>
 </AuthorizeView>
 
 Welcome to your new app.
 
 @code {
-    //Use in unit Test
+    // Use in unit Test
     public bool _isAuthenticated;
+
+    public string userName { get; set; }
+
+    private string cprNumber;
+
+    private string existingCpr;
+
+
 
     protected override async Task OnInitializedAsync()
     {
-        var autState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();   
+        
 
-        var user = autState.User;
+        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+        var user = authState.User;
+        
+        userName = user.Identity.Name;
 
-
-        if(user.Identity != null)
+        if (user.Identity != null)
             _isAuthenticated = user.Identity.IsAuthenticated;
 
-        string hasedString = _hasinHandlers.MD5Hasing("333333333");
-        string hasedString2 = _hasinHandlers.MD5Hasing("333333333");
+        // Uncomment the lines below if needed for testing
+        // string hashedString = _hashinHandlers.MD5Hasing("333333333");
+        // string hashedSHAString = _hashinHandlers.SHAHash("333333333");
+        // string hashedHMACString = _hashinHandlers.HMACHash("333333333");
+        // string hashedPBKDF2String = _hashinHandlers.PBKDF2Hash("333333333");
+        // Codes.HashinHandlers hh = new Codes.HashinHandlers();
+        // string hashedBCryptString = hh.BCRYPTHash("333333333");
+        // bool matchedBCrypt = hh.BCRYPTVerify("333333333", hashedBCryptString);
+        // bool matched = hashedString == hashedString2;
+        // bool matchedSHA = hashedSHAString == hashedSHAString2;
+        // bool matchedHMAC = hashedHMACString == hashedHMACString2;
+        // bool matchedPBKDF2 = hashedPBKDF2String == hashedPBKDF2String2;
 
-        string hasedSHAString = _hasinHandlers.SHAHash("333333333");
-        string hasedSHAString2 = _hasinHandlers.SHAHash("333333333");
-
-        string hasedHMACtring = _hasinHandlers.HMACHash("333333333");
-        string hasedHMACtring2 = _hasinHandlers.HMACHash("333333333");
-
-        string hasedhPKBFD2String = _hasinHandlers.PBKDF2Hash("333333333");
-        string hasedhPKBFD2String2 = _hasinHandlers.PBKDF2Hash("333333333");
-
-        Codes.HashinHandlers hh = new Codes.HashinHandlers();
-        string hashedString = hh.BCRYPTHash("333333333");
-
-        bool matchedBcippp = hh.BCRYPTVerify("333333333", hashedString);
-
-
-            bool matched = hasedString == hasedString2;
-            bool matchedSHA = hasedSHAString == hasedSHAString2;
-            bool matchedHMAC = hasedHMACtring == hasedHMACtring2;
-            bool matchedPKBDF2 = hasedhPKBFD2String == hasedhPKBFD2String2;
+        // Check if the user already has a CPR in the database
+        existingCpr = _todoContext.Cprs
+            .Where(c => c.User == userName)
+            .Select(c => c.Cprnr)
+            .FirstOrDefault();
     }
 
-    public async Task<bool> CreateFile()
+    public async Task CreateFile()
     {
         try
         {
@@ -81,18 +95,28 @@ Welcome to your new app.
             // Write some default content to the file
             string fileContent = "This is a newly created file.";
 
-            // Write file content to server
+            // Write file content to the server
             System.IO.File.WriteAllText(filePath, fileContent);
 
             Console.WriteLine("Created");
 
-            return true;
+            // Add the file creation logic here if needed
+
         }
         catch (Exception ex)
         {
             // Log the exception or handle it accordingly
-            Console.WriteLine("Failed");
-            return false;
+            Console.WriteLine($"Failed: {ex.Message}");
         }
+    }
+
+    private async Task AddCpr()
+    {
+        await _cprService.AddCprToDatabase(userName, cprNumber);
+        // Refresh the existing CPR after adding a new one
+        existingCpr = _todoContext.Cprs
+            .Where(c => c.User == userName)
+            .Select(c => c.Cprnr)
+            .FirstOrDefault();
     }
 }

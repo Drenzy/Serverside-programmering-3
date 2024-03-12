@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SoftwareTest.Codes;
 using SoftwareTest.Components;
 using SoftwareTest.Components.Account;
 using SoftwareTest.Data;
@@ -19,6 +20,9 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<TodolistContext>();
+builder.Services.AddScoped<CprService>();
+builder.Services.AddScoped<HashinHandlers>();
 
 builder.Services.AddAuthentication(options =>
     {
