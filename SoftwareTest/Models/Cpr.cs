@@ -5,9 +5,9 @@ namespace SoftwareTest.Models;
 
 public partial class Cpr
 {
+    public int Id { get; set; }
+
     public string? User { get; set; }
 
     public string? Cprnr { get; set; }
-
-    public int Id { get; set; }
 }

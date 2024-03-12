@@ -5,11 +5,11 @@ namespace SoftwareTest.Models;
 
 public partial class TodolostTb
 {
-    public int? Id { get; set; }
+    public int Id { get; set; }
 
-    public int? UserId { get; set; }
+    public int? Userid { get; set; }
 
-    public string? Item { get; set; }
+    public string? Items { get; set; }
 
-    public virtual Cpr? IdNavigation { get; set; }
+    public virtual Cpr? User { get; set; }
 }

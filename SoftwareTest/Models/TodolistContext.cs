@@ -27,17 +27,15 @@ public partial class TodolistContext : DbContext
     {
         modelBuilder.Entity<Cpr>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CPR__3213E83F1EB15153");
+            entity.HasKey(e => e.Id).HasName("PK__CPR__3213E83F7E677FE0");
 
             entity.ToTable("CPR");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Cprnr)
                 .HasMaxLength(500)
                 .HasColumnName("CPRnr");
-            entity.Property(e => e.User).HasMaxLength(200);
+            entity.Property(e => e.User).HasMaxLength(500);
         });
 
         modelBuilder.Entity<TodolostTb>(entity =>
@@ -46,13 +44,15 @@ public partial class TodolistContext : DbContext
                 .HasNoKey()
                 .ToTable("TodolostTB");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Item).HasMaxLength(1);
-            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.Id)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("id");
+            entity.Property(e => e.Items).HasMaxLength(1);
+            entity.Property(e => e.Userid).HasColumnName("userid");
 
-            entity.HasOne(d => d.IdNavigation).WithMany()
-                .HasForeignKey(d => d.Id)
-                .HasConstraintName("FK_TodolostTB_CPR");
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.Userid)
+                .HasConstraintName("FK_CPR_Todo");
         });
 
         OnModelCreatingPartial(modelBuilder);
