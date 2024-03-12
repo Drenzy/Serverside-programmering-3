@@ -5,6 +5,9 @@
 
 
 @inject AuthenticationStateProvider _AuthenticationStateProvider; 
+@inject Models.TodolistContext _todoContext;
+@inject Codes.HashinHandlers _hasinHandlers;
+
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
@@ -29,8 +32,33 @@ Welcome to your new app.
 
         var user = autState.User;
 
+
+
         if(user.Identity != null)
             _isAuthenticated = user.Identity.IsAuthenticated;
+
+        string hasedString = _hasinHandlers.MD5Hasing("333333333");
+        string hasedString2 = _hasinHandlers.MD5Hasing("333333333");
+
+        string hasedSHAString = _hasinHandlers.SHAHash("333333333");
+        string hasedSHAString2 = _hasinHandlers.SHAHash("333333333");
+
+        string hasedHMACtring = _hasinHandlers.HMACHash("333333333");
+        string hasedHMACtring2 = _hasinHandlers.HMACHash("333333333");
+
+        string hasedhPKBFD2String = _hasinHandlers.PBKDF2Hash("333333333");
+        string hasedhPKBFD2String2 = _hasinHandlers.PBKDF2Hash("333333333");
+
+        Codes.HashinHandlers hh = new Codes.HashinHandlers();
+        string hashedString = hh.BCRYPTHash("333333333");
+
+        bool matchedBcippp = hh.BCRYPTVerify("333333333", hashedString);
+
+
+            bool matched = hasedString == hasedString2;
+            bool matchedSHA = hasedSHAString == hasedSHAString2;
+            bool matchedHMAC = hasedHMACtring == hasedHMACtring2;
+            bool matchedPKBDF2 = hasedhPKBFD2String == hasedhPKBFD2String2;
     }
 
     public async Task<bool> CreateFile()

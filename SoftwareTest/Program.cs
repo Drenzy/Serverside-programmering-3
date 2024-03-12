@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SoftwareTest.Components;
 using SoftwareTest.Components.Account;
 using SoftwareTest.Data;
+using SoftwareTest.Models;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 
@@ -36,6 +37,11 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+    
+var connectionTODO = builder.Configuration.GetConnectionString("TodoConnection") ?? throw new InvalidOperationException("Connection string 'TodoConnection' not found.");
+builder.Services.AddDbContext<TodolistContext>(options =>
+    options.UseSqlServer(connectionTODO));
+
 }
 
 
