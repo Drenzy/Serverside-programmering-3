@@ -1,16 +1,18 @@
 ﻿// CprService.cs
-
 using System;
 using System.Threading.Tasks;
+using SoftwareTest.Codes;
 using SoftwareTest.Models;
 
 public class CprService
 {
     private readonly TodolistContext _todoContext;
+    private readonly HashinHandlers _hashingHandlers;
 
-    public CprService(TodolistContext todoContext)
+    public CprService(TodolistContext todoContext, HashinHandlers hashingHandlers)
     {
         _todoContext = todoContext ?? throw new ArgumentNullException(nameof(todoContext));
+        _hashingHandlers = hashingHandlers ?? throw new ArgumentNullException(nameof(hashingHandlers));
     }
 
     public async Task AddCprToDatabase(string userId, string cprNumber)
@@ -24,11 +26,14 @@ public class CprService
                 return;
             }
 
+            // Hash the CPR number before storing it
+            string hashedCpr = _hashingHandlers.HMACHasing(cprNumber);
+
             // Create a new CPR record
             Cpr newCpr = new Cpr
             {
                 User = userId, // Use the actual user identifier
-                Cprnr = cprNumber,
+                Cprnr = hashedCpr, // Store the hashed CPR number
             };
 
             // Add the CPR record to the database

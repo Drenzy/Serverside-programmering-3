@@ -1,71 +1,39 @@
-﻿using System.Security.Cryptography;
+﻿// HashinHandlers.cs
+using BCrypt.Net;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+
 namespace SoftwareTest.Codes
 {
     public class HashinHandlers
     {
-        public string MD5Hasing(string textToHas)
+        public string BcryptHash(string textToHash)
         {
-            MD5 md5 = MD5.Create();
-            byte[] byteArray = Encoding.ASCII.GetBytes(textToHas);
-            byte[] hasedValue = md5.ComputeHash(byteArray);
-
-            Convert.ToBase64String(hasedValue);
-            return "";
-        } 
-        
-        public string SHAHash(string textToHas)
-        {
-            SHA256 sha = SHA256.Create();
-            byte[] byteArray = Encoding.ASCII.GetBytes(textToHas);
-            byte[] hasedValue = sha.ComputeHash(byteArray);
-
-            return Convert.ToBase64String(hasedValue);
+            // Adjust the parameters as needed
+            return BCrypt.Net.BCrypt.HashPassword(textToHash, 10, true);
         }
-        
-        public string HMACHash(string textToHas)
+
+        public bool BcryptVerify(string textToHash, string hashedValue)
         {
-            
+            return BCrypt.Net.BCrypt.Verify(textToHash, hashedValue, true);
+        }
+
+        public string HMACHasing(string textToHas)
+        {
+            string certificatePath = @"C:\Users\dhart\.aspnet\https\salt.cer";
+            X509Certificate2 cert = new X509Certificate2(certificatePath);
+            string key = cert.Thumbprint;
+
             byte[] byteArray = Encoding.ASCII.GetBytes(textToHas);
-            byte[] myKey = Encoding.ASCII.GetBytes("EmilEpstien");
+            byte[] myKey = Encoding.ASCII.GetBytes(key);
 
             HMACSHA256 hmac = new HMACSHA256();
             hmac.Key = myKey;
 
-           byte[] hasedValue = hmac.ComputeHash(byteArray);
-            return Convert.ToBase64String(hasedValue);
-        }
+            byte[] hashedValue = hmac.ComputeHash(byteArray);
+            return Convert.ToBase64String(hashedValue);
 
-        public string PBKDF2Hash(string textToHas)
-        {
-
-            byte[] byteArray = Encoding.ASCII.GetBytes(textToHas);
-            byte[] byteArraySalt = Encoding.ASCII.GetBytes("DanielHartwich");
-
-            var hashinAlgo = new HashAlgorithmName("SHA256");
-            int itiration = 10;
-
-            byte[] hashedalue = Rfc2898DeriveBytes.Pbkdf2(byteArray, byteArraySalt, itiration,hashinAlgo, 32);
-
-            return Convert.ToBase64String(hashedalue);
-            
-        }
-
-        public string BCRYPTHash(string textToHas)
-        {
-            //return BCrypt.Net.BCrypt.HashPassword(textToHas);
-            //string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            //return BCrypt.Net.BCrypt.HashPassword(textToHas, salt, true, BCrypt.Net.HashType.SHA256);
-
-            return BCrypt.Net.BCrypt.HashPassword(textToHas, 10, true);
-        }
-
-        public bool BCRYPTVerify(string textToHas, string hashedValue)
-        {
-            //return BCrypt.Net.BCrypt.Verify(textToHas, hashedValue);
-            //return BCrypt.Net.BCrypt.Verify(textToHas, hashedValue, true, BCrypt.Net.HashType.SHA256);
-
-            return BCrypt.Net.BCrypt.Verify(textToHas, hashedValue, true);
         }
     }
 }
