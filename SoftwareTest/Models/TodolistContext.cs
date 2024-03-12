@@ -40,20 +40,15 @@ public partial class TodolistContext : DbContext
 
         modelBuilder.Entity<TodolostTb>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("TodolostTB");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedOnAdd()
-                .HasColumnName("id");
-            entity.Property(e => e.Items).HasMaxLength(1);
+            entity.HasKey(e => e.Id).HasName("PK_TodolostTb_Id"); // Define the primary key
+            entity.ToTable("TodolostTB");
+            entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
+            entity.Property(e => e.Items).HasMaxLength(255);
             entity.Property(e => e.Userid).HasColumnName("userid");
 
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.Userid)
-                .HasConstraintName("FK_CPR_Todo");
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.Userid).HasConstraintName("FK_CPR_Todo");
         });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

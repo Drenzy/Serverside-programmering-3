@@ -8,6 +8,8 @@
 @inject Models.TodolistContext _todoContext;
 @inject Codes.HashinHandlers _hashinHandlers;
 @inject CprService _cprService;
+@inject TodoListService _todoListService;
+
 
 <PageTitle>Home</PageTitle>
 
@@ -23,6 +25,9 @@
             if (isCprMatched.Value)
             {
                 <div>CPR Matched!</div>
+                <label for="newItemInput">Add item to list:</label>
+                <input id="newItemInput" @bind="newItem" />
+                <button @onclick="AddItemToList">Submit</button>
             }
             else
             {
@@ -51,6 +56,8 @@ Welcome to your new app.
     private string existingCpr;
     private bool? isCprMatched;
     private bool showAddCprText;
+    private string newItem;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,6 +96,15 @@ Welcome to your new app.
             {
                 showAddCprText = false; // Do not display the "Added CPR to the database" message
             }
+        }
+    }
+    private async Task AddItemToList()
+    {
+        // Check if the item is not empty
+        if (!string.IsNullOrEmpty(newItem))
+        {
+            await _todoListService.AddItemToTodoList(userName, newItem);
+            newItem = string.Empty;
         }
     }
 }

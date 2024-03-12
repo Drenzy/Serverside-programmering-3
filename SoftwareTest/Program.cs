@@ -23,6 +23,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddScoped<TodolistContext>();
 builder.Services.AddScoped<CprService>();
 builder.Services.AddScoped<HashinHandlers>();
+builder.Services.AddScoped<TodoListService>();
 
 builder.Services.AddAuthentication(options =>
     {
