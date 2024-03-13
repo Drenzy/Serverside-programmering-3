@@ -6,9 +6,12 @@
 
 @inject AuthenticationStateProvider _authenticationStateProvider;
 @inject Models.TodolistContext _todoContext;
-@inject Codes.HashinHandlers _hashinHandlers;
+@inject Codes.HashingHandlers _hashinHandlers;
+@inject Codes.SymetricEncrypting _systemCrypt;
 @inject CprService _cprService;
 @inject TodoListService _todoListService;
+@inject Codes.AsymetricEncryptHandler _asymetricEncryptHandler;
+
 
 <PageTitle>Home</PageTitle>
 
@@ -75,6 +78,12 @@
 
         if (user.Identity != null)
             _isAuthenticated = user.Identity.IsAuthenticated;
+
+            string ecnrypted = _systemCrypt.EncryptSymetric("Køb Mælk");
+            string decnrypted = _systemCrypt.DecryptSymetric(ecnrypted);
+
+            string ecnryptedValue = _asymetricEncryptHandler.Encrypt("Køb Mælk");
+            string decnryptedValue = _asymetricEncryptHandler.Decrypt(ecnryptedValue);
 
         // Check if the user already has a CPR in the database
         existingCpr = _todoContext.Cprs

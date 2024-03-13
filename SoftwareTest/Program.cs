@@ -22,8 +22,11 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<TodolistContext>();
 builder.Services.AddScoped<CprService>();
-builder.Services.AddScoped<HashinHandlers>();
+builder.Services.AddScoped<HashingHandlers>();
+builder.Services.AddScoped<SymetricEncrypting>();
+builder.Services.AddScoped<AsymetricEncryptHandler>();
 builder.Services.AddScoped<TodoListService>();
+
 
 builder.Services.AddAuthentication(options =>
     {
@@ -88,6 +91,8 @@ builder.Configuration.GetSection("Kestrel:Endpoints:HTTPS:Certificate:Path").Val
 
 string kestrelSecretPassword = builder.Configuration.GetValue<string>("mySecretKestrelPassword");
 builder.Configuration.GetSection("Kestrel:Endpoints:HTTPS:Certificate:Password").Value = kestrelSecretPassword;
+
+builder.Services.AddDataProtection();
 
 var app = builder.Build();
 

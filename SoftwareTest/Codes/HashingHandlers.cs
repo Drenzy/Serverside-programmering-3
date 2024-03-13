@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SoftwareTest.Codes
 {
-    public class HashinHandlers
+    public class HashingHandlers
     {
         public string HMACHasing(string textToHash)
         {

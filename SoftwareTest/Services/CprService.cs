@@ -7,9 +7,9 @@ using SoftwareTest.Models;
 public class CprService
 {
     private readonly TodolistContext _todoContext;
-    private readonly HashinHandlers _hashingHandlers;
+    private readonly HashingHandlers _hashingHandlers;
 
-    public CprService(TodolistContext todoContext, HashinHandlers hashingHandlers)
+    public CprService(TodolistContext todoContext, HashingHandlers hashingHandlers)
     {
         _todoContext = todoContext ?? throw new ArgumentNullException(nameof(todoContext));
         _hashingHandlers = hashingHandlers ?? throw new ArgumentNullException(nameof(hashingHandlers));
