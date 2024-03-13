@@ -1,5 +1,6 @@
 ﻿@page "/"
 
+@using Codes
 @using Microsoft.AspNetCore.Authorization
 @using SoftwareTest.Models
 @* @attribute [Authorize(Policy = "AuthenticatedUser")] *@
@@ -33,6 +34,18 @@ else
         <button @onclick="AddCpr">Submit</button>
         <label for="cprInput">Enter CPR Number:</label>
         <input id="cprInput" @bind="cprNumber" maxlength="10" />
+
+        <div></div>
+
+        <label for="typeInput">select type:</label>
+        <select name="type" id="type" @bind="selectedReturnType">
+            <option value="String">String</option>
+            <option value="ByteArray">ByteArray</option>
+            <option value="Int">Int</option>
+            <option value="UTFString">UTFString</option>
+            <option value="HexString">HexString</option>
+        </select>
+
         @if (!string.IsNullOrEmpty(existingCpr))
         {
             <div>Existing CPR: @existingCpr</div>
@@ -85,6 +98,8 @@ else
     private bool showAddCprText;
     private string newItem;
     private List<TodolostTb> userItems;
+    private string selectedReturnType;
+    private ReturnTypes returnType;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,15 +133,16 @@ else
         if (string.IsNullOrEmpty(existingCpr))
         {
             // Add a new CPR to the database
-            await _cprService.AddCprToDatabase(userName, cprNumber);
+            await _cprService.AddCprToDatabase(userName, cprNumber, returnType);
             existingCpr = cprNumber; // Set existingCpr to the newly added CPR
             isCprMatched = true; // Indicate that the CPR is matched
             showAddCprText = true; // Display the "Added CPR to the database" message
         }
         else
         {
+            returnType = Enum.Parse<ReturnTypes>(selectedReturnType);
             // Check if the entered CPR matches the stored CPR in the database
-            bool isMatched = _hashinHandlers.HMACVerify(cprNumber, existingCpr);
+            bool isMatched = _hashinHandlers.HMACVerify(cprNumber, existingCpr, returnType);
             isCprMatched = isMatched; // Set isCprMatched based on the verification result
 
             if (!isMatched)

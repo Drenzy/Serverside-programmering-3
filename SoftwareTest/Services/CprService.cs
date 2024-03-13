@@ -15,7 +15,7 @@ public class CprService
         _hashingHandlers = hashingHandlers ?? throw new ArgumentNullException(nameof(hashingHandlers));
     }
 
-    public async Task AddCprToDatabase(string userId, string cprNumber)
+    public async Task AddCprToDatabase(string userId, string cprNumber, ReturnTypes returnType)
     {
         try
         {
@@ -27,7 +27,7 @@ public class CprService
             }
 
             // Hash the CPR number before storing it
-            string hashedCpr = _hashingHandlers.HMACHasing(cprNumber);
+            string hashedCpr = _hashingHandlers.HMACHasing(cprNumber, returnType);
 
             // Create a new CPR record
             Cpr newCpr = new Cpr
