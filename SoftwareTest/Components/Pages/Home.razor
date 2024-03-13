@@ -35,10 +35,14 @@
 
                 <h3>Todo List</h3>
                 <ul>
-                    @foreach (var item in userItems)
+                    @if (userItems != null && userItems.Count > 0)
                     {
-                        <li>@item.Items</li>
+                        @foreach (var item in userItems)
+                        {
+                            <li>@_asymetricEncryptHandler.Decrypt(@item.Items)</li>
+                        }
                     }
+                    
                 </ul>
             }
             
@@ -79,20 +83,17 @@
         if (user.Identity != null)
             _isAuthenticated = user.Identity.IsAuthenticated;
 
-            string ecnrypted = _systemCrypt.EncryptSymetric("Køb Mælk");
-            string decnrypted = _systemCrypt.DecryptSymetric(ecnrypted);
-
-            string ecnryptedValue = _asymetricEncryptHandler.Encrypt("Køb Mælk");
-            string decnryptedValue = _asymetricEncryptHandler.Decrypt(ecnryptedValue);
-
         // Check if the user already has a CPR in the database
         existingCpr = _todoContext.Cprs
             .Where(c => c.User == userName)
             .Select(c => c.Cprnr)
             .FirstOrDefault();
 
+
         // Retrieve the user's items
         userItems = await _todoListService.GetTodoListItems(userName);
+
+        
     }
 
     private async Task AddCpr()
@@ -125,11 +126,17 @@
         // Check if the item is not empty
         if (!string.IsNullOrEmpty(newItem))
         {
-            await _todoListService.AddItemToTodoList(userName, newItem);
-            newItem = string.Empty;
+            // Encrypt the new item using asymmetric encryption
+            string encryptedNewItem = _asymetricEncryptHandler.Encrypt(newItem);
 
-            // Update the user's items after adding a new item
+            // Add the encrypted item to the TodoList
+            await _todoListService.AddItemToTodoList(userName, encryptedNewItem);
+
+            newItem = string.Empty;
+            
             userItems = await _todoListService.GetTodoListItems(userName);
+
         }
     }
+
 }
