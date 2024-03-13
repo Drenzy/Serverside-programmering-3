@@ -15,6 +15,9 @@
 <AuthorizeView>
     <Authorized>
         <div>You are logged in @userName</div>
+        <button @onclick="AddCpr">Submit</button>
+        <label for="cprInput">Enter CPR Number:</label>
+        <input id="cprInput" @bind="cprNumber" maxlength="10" />
         @if (!string.IsNullOrEmpty(existingCpr))
         {
             <div>Existing CPR: @existingCpr</div>
@@ -35,25 +38,23 @@
                     }
                 </ul>
             }
-            else
-            {
-                <div>CPR does not match!</div>
-            }
+            
         }
-        @if (showAddCprText)
+        @if (showAddCprText && !isCprMatched.HasValue)
         {
             <div>Added CPR to the database: @cprNumber</div>
         }
-        <button @onclick="AddCpr">Submit</button>
-        <label for="cprInput">Enter CPR Number:</label>
-        <input id="cprInput" @bind="cprNumber" maxlength="10" />
+
+        @if (isCprMatched.HasValue && !isCprMatched.Value)
+        {
+            <div>CPR does not match!</div>
+        }
+       
     </Authorized>
     <NotAuthorized>
         <div>You are not logged in</div>
     </NotAuthorized>
 </AuthorizeView>
-
-Welcome to your new app.
 
 @code {
     public bool _isAuthenticated;
@@ -94,6 +95,7 @@ Welcome to your new app.
             await _cprService.AddCprToDatabase(userName, cprNumber);
             existingCpr = cprNumber; // Set existingCpr to the newly added CPR
             isCprMatched = true; // Indicate that the CPR is matched
+            showAddCprText = true; // Display the "Added CPR to the database" message
         }
         else
         {
@@ -101,9 +103,10 @@ Welcome to your new app.
             bool isMatched = _hashinHandlers.HMACVerify(cprNumber, existingCpr);
             isCprMatched = isMatched; // Set isCprMatched based on the verification result
 
-            if (isMatched)
+            if (!isMatched)
             {
-                showAddCprText = false; // Do not display the "Added CPR to the database" message
+                // If CPR does not match, display the text
+                showAddCprText = false;
             }
         }
     }
