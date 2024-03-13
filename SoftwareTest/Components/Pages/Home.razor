@@ -4,12 +4,11 @@
 @using SoftwareTest.Models
 @attribute [Authorize(Policy = "AuthenticatedUser")]
 
-@inject AuthenticationStateProvider _AuthenticationStateProvider;
+@inject AuthenticationStateProvider _authenticationStateProvider;
 @inject Models.TodolistContext _todoContext;
 @inject Codes.HashinHandlers _hashinHandlers;
 @inject CprService _cprService;
 @inject TodoListService _todoListService;
-
 
 <PageTitle>Home</PageTitle>
 
@@ -19,15 +18,22 @@
         @if (!string.IsNullOrEmpty(existingCpr))
         {
             <div>Existing CPR: @existingCpr</div>
-        }
-        @if (isCprMatched.HasValue)
-        {
-            if (isCprMatched.Value)
+
+            @if (isCprMatched.HasValue && isCprMatched.Value)
             {
                 <div>CPR Matched!</div>
+
                 <label for="newItemInput">Add item to list:</label>
                 <input id="newItemInput" @bind="newItem" />
                 <button @onclick="AddItemToList">Submit</button>
+
+                <h3>Todo List</h3>
+                <ul>
+                    @foreach (var item in userItems)
+                    {
+                        <li>@item.Items</li>
+                    }
+                </ul>
             }
             else
             {
@@ -57,11 +63,11 @@ Welcome to your new app.
     private bool? isCprMatched;
     private bool showAddCprText;
     private string newItem;
-
+    private List<TodolostTb> userItems;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await _AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
         userName = user.Identity.Name;
@@ -74,6 +80,9 @@ Welcome to your new app.
             .Where(c => c.User == userName)
             .Select(c => c.Cprnr)
             .FirstOrDefault();
+
+        // Retrieve the user's items
+        userItems = await _todoListService.GetTodoListItems(userName);
     }
 
     private async Task AddCpr()
@@ -98,6 +107,7 @@ Welcome to your new app.
             }
         }
     }
+
     private async Task AddItemToList()
     {
         // Check if the item is not empty
@@ -105,6 +115,9 @@ Welcome to your new app.
         {
             await _todoListService.AddItemToTodoList(userName, newItem);
             newItem = string.Empty;
+
+            // Update the user's items after adding a new item
+            userItems = await _todoListService.GetTodoListItems(userName);
         }
     }
 }

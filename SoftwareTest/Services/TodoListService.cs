@@ -54,4 +54,11 @@ public class TodoListService
             Console.WriteLine($"Failed to add item to the TodoList. Error: {ex.Message}");
         }
     }
+
+    public async Task<List<TodolostTb>> GetTodoListItems(string userId)
+    {
+        return await _todoContext.TodolostTbs
+            .Where(t => t.User.User == userId)
+            .ToListAsync();
+    }
 }
