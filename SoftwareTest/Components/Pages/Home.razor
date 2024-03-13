@@ -140,8 +140,10 @@ else
         }
         else
         {
-            returnType = Enum.Parse<ReturnTypes>(selectedReturnType);
-            // Check if the entered CPR matches the stored CPR in the database
+            returnType = Enum.TryParse<ReturnTypes>(selectedReturnType, out var parsedReturnType)
+            ? parsedReturnType
+            : Enum.GetValues(typeof(ReturnTypes)).Cast<ReturnTypes>().FirstOrDefault();
+                                               // Check if the entered CPR matches the stored CPR in the database
             bool isMatched = _hashinHandlers.HMACVerify(cprNumber, existingCpr, returnType);
             isCprMatched = isMatched; // Set isCprMatched based on the verification result
 
