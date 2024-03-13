@@ -2,7 +2,9 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using SoftwareTest.Models
-@attribute [Authorize(Policy = "AuthenticatedUser")]
+@* @attribute [Authorize(Policy = "AuthenticatedUser")] *@
+@inject IServiceProvider _serviceProvider;
+
 
 @inject AuthenticationStateProvider _authenticationStateProvider;
 @inject Models.TodolistContext _todoContext;
@@ -11,10 +13,20 @@
 @inject CprService _cprService;
 @inject TodoListService _todoListService;
 @inject Codes.AsymetricEncryptHandler _asymetricEncryptHandler;
+@inject Codes.RoleHandler _roleHandler;
 
 
 <PageTitle>Home</PageTitle>
 
+@if(_isAdmin) 
+{
+    <div>You are an admin</div>
+
+}
+else
+{
+    <div>You are not an admin</div>
+}
 <AuthorizeView>
     <Authorized>
         <div>You are logged in @userName</div>
@@ -65,6 +77,7 @@
 
 @code {
     public bool _isAuthenticated;
+    public bool _isAdmin;
     public string userName { get; set; }
     private string cprNumber;
     private string existingCpr;
@@ -82,6 +95,7 @@
 
         if (user.Identity != null)
             _isAuthenticated = user.Identity.IsAuthenticated;
+        _isAdmin = user.IsInRole("Admin");
 
         // Check if the user already has a CPR in the database
         existingCpr = _todoContext.Cprs
@@ -90,7 +104,9 @@
             .FirstOrDefault();
 
 
-        // Retrieve the user's items
+       // await _roleHandler.CreateUserRole("dan@emil.dk", "Admin", _serviceProvider);
+
+    // Retrieve the user's items
         userItems = await _todoListService.GetTodoListItems(userName);
 
         

@@ -26,6 +26,7 @@ builder.Services.AddScoped<HashingHandlers>();
 builder.Services.AddScoped<SymetricEncrypting>();
 builder.Services.AddScoped<AsymetricEncryptHandler>();
 builder.Services.AddScoped<TodoListService>();
+builder.Services.AddScoped<RoleHandler>();
 
 
 builder.Services.AddAuthentication(options =>
@@ -60,6 +61,7 @@ builder.Services.AddDbContext<TodolistContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -68,9 +70,13 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AuthenticatedUser" , policy =>
+    options.AddPolicy("AuthenticatedUser", policy =>
     {
         policy.RequireAuthenticatedUser();
+    });
+    options.AddPolicy("RequrieAdminRole", policy =>
+    {
+        policy.RequireRole("Admin");
     });
 });
 
