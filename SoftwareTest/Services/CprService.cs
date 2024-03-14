@@ -1,6 +1,9 @@
-﻿// CprService.cs
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SoftwareTest.Codes;
 using SoftwareTest.Models;
 
@@ -47,4 +50,19 @@ public class CprService
             Console.WriteLine($"Failed to add CPR to the database. Error: {ex.Message}");
         }
     }
+
+    public async Task<List<Cpr>> GetAllCPR()
+    {
+        try
+        {
+            // Retrieve all CPR records from the database
+            return await _todoContext.Cprs.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to get CPR records from the database. Error: {ex.Message}");
+            return null;
+        }
+    }
+
 }

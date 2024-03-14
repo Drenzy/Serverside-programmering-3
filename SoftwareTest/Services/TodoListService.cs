@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,20 @@ public class TodoListService
     public TodoListService(TodolistContext todoContext)
     {
         _todoContext = todoContext ?? throw new ArgumentNullException(nameof(todoContext));
+    }
+
+    public async Task<List<TodolostTb>> GetAllTodoList()
+    {
+        try
+        {
+            // Retrieve all TodoList items from the database
+            return await _todoContext.TodolostTbs.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to get TodoList items from the database. Error: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task AddItemToTodoList(string userId, string newItem)
@@ -51,6 +66,35 @@ public class TodoListService
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to add item to the TodoList. Error: {ex.Message}");
+        }
+    }
+
+    public async Task DeleteItemFromTodoList(int itemId)
+    {
+        try
+        {
+            // Find the todo list item by its unique identifier
+            var itemToDelete = await _todoContext.TodolostTbs.FindAsync(itemId);
+
+            // Ensure the item exists
+            if (itemToDelete != null)
+            {
+                // Remove the item from the context
+                _todoContext.TodolostTbs.Remove(itemToDelete);
+
+                // Save changes to the database
+                await _todoContext.SaveChangesAsync();
+
+                Console.WriteLine("Item deleted from the TodoList successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Item not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to delete item from the TodoList. Error: {ex.Message}");
         }
     }
 

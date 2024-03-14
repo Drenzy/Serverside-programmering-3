@@ -5,8 +5,6 @@
 @using SoftwareTest.Models
 @* @attribute [Authorize(Policy = "AuthenticatedUser")] *@
 @inject IServiceProvider _serviceProvider;
-
-
 @inject AuthenticationStateProvider _authenticationStateProvider;
 @inject Models.TodolistContext _todoContext;
 @inject Codes.HashingHandlers _hashinHandlers;
@@ -17,76 +15,97 @@
 @inject Codes.RoleHandler _roleHandler;
 
 
-<PageTitle>Home</PageTitle>
 
-@if(_isAdmin) 
-{
-    <div>You are an admin</div>
+<div class="container-fluid">
+    <div class="container">
+        <PageTitle>Home</PageTitle>
+       <AuthorizeView>
+           <Authorized>
+                @if (_isAdmin)
+                {
+                    <div class="alert alert-info mb-2">You are an admin</div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-2">You are not an admin</div>
+                }
+           </Authorized>
 
-}
-else
-{
-    <div>You are not an admin</div>
-}
-<AuthorizeView>
-    <Authorized>
-        <div>You are logged in @userName</div>
-        <button @onclick="AddCpr">Submit</button>
-        <label for="cprInput">Enter CPR Number:</label>
-        <input id="cprInput" @bind="cprNumber" maxlength="10" />
+       </AuthorizeView>          
+        <AuthorizeView>
+            <Authorized>
+                <div class=" alert alert-success mb-2">You are logged in @userName</div>
+                <div class="alert alert-info">Existing CPR: @existingCpr</div>
+                <div class="col-md-3 form-group mb-2">
+                    <label for="cprInput">Enter CPR Number:</label>
+                    <input id="cprInput" class="form-control" @bind="cprNumber" maxlength="10" />
+                </div>
+                <button class="btn btn-primary mb-2" @onclick="AddCpr">Submit</button>
 
-        <div></div>
+                <div class="col-md-3 form-group mb-2">
+                    <label for="typeInput">Select type:</label>
+                    <select class="form-control" id="type" @bind="selectedReturnType">
+                        <option value="String">String</option>
+                        <option value="ByteArray">ByteArray</option>
+                        <option value="Int">Int</option>
+                        <option value="UTFString">UTFString</option>
+                        <option value="HexString">HexString</option>
+                    </select>
+                </div>
 
-        <label for="typeInput">select type:</label>
-        <select name="type" id="type" @bind="selectedReturnType">
-            <option value="String">String</option>
-            <option value="ByteArray">ByteArray</option>
-            <option value="Int">Int</option>
-            <option value="UTFString">UTFString</option>
-            <option value="HexString">HexString</option>
-        </select>
+                @if (!string.IsNullOrEmpty(existingCpr))
+                {                   
 
-        @if (!string.IsNullOrEmpty(existingCpr))
-        {
-            <div>Existing CPR: @existingCpr</div>
-
-            @if (isCprMatched.HasValue && isCprMatched.Value)
-            {
-                <div>CPR Matched!</div>
-
-                <label for="newItemInput">Add item to list:</label>
-                <input id="newItemInput" @bind="newItem" />
-                <button @onclick="AddItemToList">Submit</button>
-
-                <h3>Todo List</h3>
-                <ul>
-                    @if (userItems != null && userItems.Count > 0)
+                    @if (isCprMatched.HasValue && isCprMatched.Value)
                     {
-                        @foreach (var item in userItems)
-                        {
-                            <li>@_asymetricEncryptHandler.Decrypt(@item.Items)</li>
-                        }
-                    }
-                    
-                </ul>
-            }
-            
-        }
-        @if (showAddCprText && !isCprMatched.HasValue)
-        {
-            <div>Added CPR to the database: @cprNumber</div>
-        }
+                        <div class="alert alert-success mb-2">CPR Matched!</div>
 
-        @if (isCprMatched.HasValue && !isCprMatched.Value)
-        {
-            <div>CPR does not match!</div>
-        }
-       
-    </Authorized>
-    <NotAuthorized>
-        <div>You are not logged in</div>
-    </NotAuthorized>
-</AuthorizeView>
+                        <div class="col-md-3 form-group mb-2">
+                            <label for="newItemInput">Add item to list:</label>
+                            <input id="newItemInput" class="form-control" @bind="newItem" />
+                        </div>
+                        <button class="btn btn-primary mb-2" @onclick="AddItemToList">Submit</button>
+
+                        <h3>Todo List</h3>
+                        <ul class="col-md-3 list-group">
+                            @if (userItems != null && userItems.Count > 0)
+                            {
+                                @foreach (var item in userItems)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <label>@_asymetricEncryptHandler.Decrypt(@item.Items)</label>
+                                        </div>
+                                        <div>
+                                            @if (_isAdmin)
+                                            {
+                                                <button class="btn btn-danger btn-sm" style="margin-left: 10px;" @onclick="() => DeleteItem(item)">Delete</button>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                }
+
+                @if (showAddCprText && !isCprMatched.HasValue)
+                {
+                    <div class="col-md-3 alert alert-info mb-2">Added CPR to the database: @cprNumber</div>
+                }
+
+                @if (isCprMatched.HasValue && !isCprMatched.Value)
+                {
+                    <div class="col-md-3 alert alert-danger mb-2">CPR does not match!</div>
+                }
+            </Authorized>
+
+            <NotAuthorized>
+                <div class="alert alert-warning mb-2">You are not logged in</div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
 
 @code {
     public bool _isAuthenticated;
@@ -119,12 +138,12 @@ else
             .FirstOrDefault();
 
 
-       // await _roleHandler.CreateUserRole("dan@emil.dk", "Admin", _serviceProvider);
+        //await _roleHandler.CreateUserRole("admin@admin.dk", "Admin", _serviceProvider);
 
-    // Retrieve the user's items
+        // Retrieve the user's items
         userItems = await _todoListService.GetTodoListItems(userName);
 
-        
+
     }
 
     private async Task AddCpr()
@@ -141,9 +160,9 @@ else
         else
         {
             returnType = Enum.TryParse<ReturnTypes>(selectedReturnType, out var parsedReturnType)
-            ? parsedReturnType
-            : Enum.GetValues(typeof(ReturnTypes)).Cast<ReturnTypes>().FirstOrDefault();
-                                               // Check if the entered CPR matches the stored CPR in the database
+    ? parsedReturnType
+    : Enum.GetValues(typeof(ReturnTypes)).Cast<ReturnTypes>().FirstOrDefault();
+            // Check if the entered CPR matches the stored CPR in the database
             bool isMatched = _hashinHandlers.HMACVerify(cprNumber, existingCpr, returnType);
             isCprMatched = isMatched; // Set isCprMatched based on the verification result
 
@@ -167,10 +186,18 @@ else
             await _todoListService.AddItemToTodoList(userName, encryptedNewItem);
 
             newItem = string.Empty;
-            
+
             userItems = await _todoListService.GetTodoListItems(userName);
 
         }
+    }
+    private async Task DeleteItem(TodolostTb itemToDelete)
+    {
+        // Assuming TodolostTb has an ID property or a unique identifier
+        await _todoListService.DeleteItemFromTodoList(itemToDelete.Id);
+
+        // Update the list of userItems after deletion
+        userItems.Remove(itemToDelete);
     }
 
 }
